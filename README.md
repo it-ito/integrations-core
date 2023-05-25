@@ -15,7 +15,7 @@ repository, so to get started using them, you can simply [install the Agent][8]
 for your operating system. The [AGENT_CHANGELOG](AGENT_CHANGELOG.md) file shows
 which Integrations have been updated in each Agent version.
 
-## Contributing
+## Contributing#
 
 Working with integrations is easy, the main page of the [development docs][6]
 contains all the info you need to get your dev environment up and running in minutes
