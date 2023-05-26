@@ -1,0 +1,20 @@
+name: MyPRTest
+
+on:
+  push:
+    branches:
+      - 'it-ito-*'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/my-test.yml
+    with:
+      repo: core
+
+      # Options
+      standard: true
+      test-py2: true
+    secrets: inherit
