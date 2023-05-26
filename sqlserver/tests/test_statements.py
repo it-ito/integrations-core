@@ -437,7 +437,6 @@ def test_statement_metrics_and_plans(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-@pytest.mark.skip(reason="test")
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
