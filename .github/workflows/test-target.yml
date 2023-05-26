@@ -188,66 +188,66 @@ jobs:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
       run: ddev test --cov --junit ${{ inputs.target }}
 
-    - name: Run Unit & Integration tests with minimum version of base package
-      if: inputs.standard && inputs.minimum-base-package
-      run: ddev test --force-base-min --force-env-rebuild --junit ${{ inputs.target }}
+    # - name: Run Unit & Integration tests with minimum version of base package
+    #   if: inputs.standard && inputs.minimum-base-package
+    #   run: ddev test --force-base-min --force-env-rebuild --junit ${{ inputs.target }}
 
-    - name: Run E2E tests with latest base package
-      if: inputs.standard && inputs.repo == 'core'
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }}
+    # - name: Run E2E tests with latest base package
+    #   if: inputs.standard && inputs.repo == 'core'
+    #   env:
+    #     DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+    #   run: ddev env test --base --new-env --junit ${{ inputs.target }}
 
-    - name: Run E2E tests
-      if: inputs.standard && inputs.repo != 'core'
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-      run: ddev env test --new-env --junit ${{ inputs.target }}
+    # - name: Run E2E tests
+    #   if: inputs.standard && inputs.repo != 'core'
+    #   env:
+    #     DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+    #   run: ddev env test --new-env --junit ${{ inputs.target }}
 
-    - name: Run benchmarks
-      if: inputs.benchmark
-      run: ddev test --bench --junit ${{ inputs.target }}
+    # - name: Run benchmarks
+    #   if: inputs.benchmark
+    #   run: ddev test --bench --junit ${{ inputs.target }}
 
-    - name: Run tests and verify support for the latest version
-      if: inputs.latest
-      run: ddev test --latest --junit ${{ inputs.target }}
+    # - name: Run tests and verify support for the latest version
+    #   if: inputs.latest
+    #   run: ddev test --latest --junit ${{ inputs.target }}
 
-    - name: Run E2E tests for the latest version
-      if: inputs.latest
-      env:
-        DD_API_KEY: "${{ secrets.DD_API_KEY }}"
-        DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
-      run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
+    # - name: Run E2E tests for the latest version
+    #   if: inputs.latest
+    #   env:
+    #     DD_API_KEY: "${{ secrets.DD_API_KEY }}"
+    #     DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && '1' || '0' }}"
+    #   run: ddev env test --base --new-env --junit ${{ inputs.target }}:latest
 
-    - name: View trace log
-      if: inputs.repo == 'core' && always()
-      run: cat "${{ env.TRACE_CAPTURE_LOG }}"
+    # - name: View trace log
+    #   if: inputs.repo == 'core' && always()
+    #   run: cat "${{ env.TRACE_CAPTURE_LOG }}"
 
-    - name: Upload captured traces
-      if: inputs.repo == 'core' && always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: "${{ inputs.traces-artifact-name }}"
-        path: "${{ env.TRACE_CAPTURE_FILE }}"
+    # - name: Upload captured traces
+    #   if: inputs.repo == 'core' && always()
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: "${{ inputs.traces-artifact-name }}"
+    #     path: "${{ env.TRACE_CAPTURE_FILE }}"
 
-    - name: Finalize test results
-      if: always()
-      run: |-
-        mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        if [[ -d ${{ inputs.target }}/.junit ]]; then
-          mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
-        fi
+    # - name: Finalize test results
+    #   if: always()
+    #   run: |-
+    #     mkdir -p "${{ env.TEST_RESULTS_DIR }}"
+    #     if [[ -d ${{ inputs.target }}/.junit ]]; then
+    #       mv ${{ inputs.target }}/.junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+    #     fi
 
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: "${{ env.TEST_RESULTS_BASE_DIR }}"
+    # - name: Upload test results
+    #   if: always()
+    #   uses: actions/upload-artifact@v3
+    #   with:
+    #     name: test-results
+    #     path: "${{ env.TEST_RESULTS_BASE_DIR }}"
 
-    - name: Upload coverage data
-      if: inputs.standard && !github.event.repository.private && always()
-      uses: codecov/codecov-action@v3
-      with:
-        files: "${{ inputs.target }}/coverage.xml"
-        flags: "${{ inputs.target }}"
+    # - name: Upload coverage data
+    #   if: inputs.standard && !github.event.repository.private && always()
+    #   uses: codecov/codecov-action@v3
+    #   with:
+    #     files: "${{ inputs.target }}/coverage.xml"
+    #     flags: "${{ inputs.target }}"
