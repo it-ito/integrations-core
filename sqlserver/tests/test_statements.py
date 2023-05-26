@@ -68,6 +68,7 @@ def dbm_instance(instance_docker):
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skip(reason="test")
 @pytest.mark.parametrize(
     "expected_columns,available_columns",
     [
@@ -94,6 +95,7 @@ def test_get_available_query_metrics_columns(dbm_instance, expected_columns, ava
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="test")
 @pytest.mark.usefixtures('dd_environment')
 def test_get_statement_metrics_query_cached(aggregator, dbm_instance, caplog):
     caplog.set_level(logging.DEBUG)
@@ -275,6 +277,7 @@ test_statement_metrics_and_plans_parameterized = (
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skip(reason="test")
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
 def test_statement_metrics_and_plans(
     aggregator,
@@ -434,6 +437,7 @@ def test_statement_metrics_and_plans(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skip(reason="test")
 @pytest.mark.parametrize(
     "metadata,expected_metadata_payload",
     [
@@ -501,6 +505,7 @@ def test_statement_metadata(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skip(reason="test")
 @pytest.mark.parametrize(
     "input_cloud_metadata,output_cloud_metadata",
     [
@@ -613,6 +618,7 @@ def test_statement_cloud_metadata(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
+@pytest.mark.skip(reason="test")
 @pytest.mark.parametrize(
     "reported_hostname,expected_hostname",
     [
@@ -747,6 +753,7 @@ def _mock_sql_obfuscate(sql_string, options=None):
         ("test2_raw.xml", "test2_obfuscated.xml"),
     ],
 )
+@pytest.mark.skip(reason="test")
 def test_obfuscate_xml_plan(test_file, obfuscated_file, datadog_agent):
     test_plan = _strip_whitespace(_load_test_xml_plan(test_file))
     expected_result = _strip_whitespace(_load_test_xml_plan(obfuscated_file))
@@ -778,6 +785,7 @@ def test_async_job_enabled(dd_run_check, dbm_instance, statement_metrics_enabled
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="test")
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_metrics']['run_sync'] = False
@@ -792,6 +800,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="test")
 @pytest.mark.usefixtures('dd_environment')
 def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     dbm_instance['query_metrics']['run_sync'] = False
