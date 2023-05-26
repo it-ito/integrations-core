@@ -94,13 +94,20 @@ select
 STATEMENT_METRICS_QUERY_NO_AGGREGATES = """\
 with qstats_aggr as (
     select TOP {limit} query_hash, query_plan_hash,
-        max(plan_handle) as plan_handle,
-        max(statement_start_offset) as statement_start_offset,
-        max(statement_end_offset) as statement_end_offset,
+        max(CONCAT(
+            CONVERT(binary(64), plan_handle),
+            CONVERT(binary(4), statement_start_offset),
+            CONVERT(binary(4), statement_end_offset))) as plan_handle_and_offsets,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats S
         where last_execution_time > dateadd(second, -?, getdate())
         group by query_hash, query_plan_hash
+),
+qstats_aggr_split as (select
+    convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
+    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
+    convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    * from qstats_aggr
 )
 select
     SUBSTRING(text, (statement_start_offset / 2) + 1,
@@ -110,7 +117,7 @@ select
     END - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
     encrypted as is_encrypted,
-    * from qstats_aggr
+    * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
 """
 
