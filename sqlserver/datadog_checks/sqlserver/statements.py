@@ -70,6 +70,7 @@ qstats_aggr as (
        max(last_execution_time) as last_execution_time,
        max(last_elapsed_time) as last_elapsed_time,
        max(fixed_plan_handle) as fixed_plan_handle,
+       min(fixed_plan_handle) as min_fixed_plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
@@ -88,13 +89,16 @@ select
         WHEN -1 THEN DATALENGTH(qt.text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
-    qt.text,
+    qt.text as text,
     qt.text as orig_text,
+    qt.text as orig_text2,
     qt2.text as fixed_text,
+    qt3.text as min_fixed_text,
     qt.encrypted as is_encrypted,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
     cross apply sys.dm_exec_sql_text(fixed_plan_handle) qt2
+    cross apply sys.dm_exec_sql_text(min_fixed_plan_handle) qt3
 """
 
 # This query is an optimized version of the statement metrics query
