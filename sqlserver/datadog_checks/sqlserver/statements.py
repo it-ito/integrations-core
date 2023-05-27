@@ -60,6 +60,7 @@ with qstats as (
                 CONVERT(binary(4), statement_start_offset),
                 CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
+           plan_handle as fixed_plan_handle,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
 ),
@@ -68,6 +69,7 @@ qstats_aggr as (
        D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
        max(last_execution_time) as last_execution_time,
        max(last_elapsed_time) as last_elapsed_time,
+       max(fixed_plan_handle) as fixed_plan_handle,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
@@ -81,15 +83,18 @@ qstats_aggr_split as (select TOP {limit}
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
-    SUBSTRING(text, (statement_start_offset / 2) + 1,
+    SUBSTRING(qt.text, (statement_start_offset / 2) + 1,
     ((CASE statement_end_offset
-        WHEN -1 THEN DATALENGTH(text)
+        WHEN -1 THEN DATALENGTH(qt.text)
         ELSE statement_end_offset END
             - statement_start_offset) / 2) + 1) AS statement_text,
     qt.text,
-    encrypted as is_encrypted,
+    qt.text as orig_text,
+    qt2.text as fixed_text,
+    qt.encrypted as is_encrypted,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
+    cross apply sys.dm_exec_sql_text(fixed_plan_handle) qt2
 """
 
 # This query is an optimized version of the statement metrics query
