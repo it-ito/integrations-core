@@ -59,6 +59,10 @@ with qstats as (
                 CONVERT(binary(64), plan_handle),
                 CONVERT(binary(4), statement_start_offset),
                 CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
+            CONCAT(
+                CONVERT(nvarchar, plan_handle, 1), ',',
+                CONVERT(nvarchar, statement_start_offset), ',',
+                CONVERT(nvarchar, statement_end_offset)) as char_plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            plan_handle as fixed_plan_handle,
            {query_metrics_columns}
@@ -71,6 +75,7 @@ qstats_aggr as (
        max(last_elapsed_time) as last_elapsed_time,
        max(fixed_plan_handle) as fixed_plan_handle,
        min(fixed_plan_handle) as min_fixed_plan_handle,
+       max(char_plan_handle_and_offsets) as char_plan_handle_and_offsets,
     {query_metrics_column_sums}
     from qstats S
     left join sys.databases D on S.dbid = D.database_id
@@ -80,7 +85,11 @@ qstats_aggr_split as (select TOP {limit}
     convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+    -- substring(char_plan_handle_and_offsets, first_comma_index + 1, second_comma_index - first_comma_index - 1) as statement_start_offset_char,
+    convert(binary(64), substring(char_plan_handle_and_offsets, 1, first_comma_index - 1), 1) as char_plan_handle,
     * from qstats_aggr
+    cross apply (select CHARINDEX(',', char_plan_handle_and_offsets , 1) as first_comma_index) as comma_position1
+    cross apply (select CHARINDEX(',', char_plan_handle_and_offsets , first_comma_index+1)  as second_comma_index) as comma_position2
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
@@ -99,6 +108,7 @@ select
     cross apply sys.dm_exec_sql_text(plan_handle) qt
     cross apply sys.dm_exec_sql_text(fixed_plan_handle) qt2
     cross apply sys.dm_exec_sql_text(min_fixed_plan_handle) qt3
+    cross apply sys.dm_exec_sql_text(char_plan_handle) qt4
 """
 
 # This query is an optimized version of the statement metrics query
