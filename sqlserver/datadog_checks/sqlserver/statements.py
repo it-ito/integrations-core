@@ -59,6 +59,10 @@ with qstats as (
                 CONVERT(binary(64), plan_handle),
                 CONVERT(binary(4), statement_start_offset),
                 CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
+            CONCAT(
+                CONVERT(nvarchar, plan_handle), ',',
+                CONVERT(nvarchar, statement_start_offset), ',',
+                CONVERT(nvarchar, statement_end_offset)) as fixed_plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            {query_metrics_columns}
     from sys.dm_exec_query_stats
@@ -66,6 +70,7 @@ with qstats as (
 qstats_aggr as (
     select query_hash, query_plan_hash, CAST(S.dbid as int) as dbid,
        D.name as database_name, max(plan_handle_and_offsets) as plan_handle_and_offsets,
+       max(fixed_plan_handle_and_offsets) as fixed_plan_handle_and_offsets,
        max(last_execution_time) as last_execution_time,
        max(last_elapsed_time) as last_elapsed_time,
     {query_metrics_column_sums}
@@ -78,6 +83,8 @@ qstats_aggr_split as (select TOP {limit}
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
     * from qstats_aggr
+    cross apply (select CHARINDEX(',', fixed_plan_handle_and_offsets , 1) as first_comma_index) as comma_position1
+    cross apply (select CHARINDEX(',', fixed_plan_handle_and_offsets , first_comma_index+1)  as second_comma_index) as comma_position2
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
