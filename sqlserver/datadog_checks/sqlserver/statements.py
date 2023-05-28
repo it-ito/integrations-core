@@ -82,6 +82,8 @@ qstats_aggr_split as (select TOP {limit}
     convert(varbinary(64), substring(plan_handle_and_offsets, 1, 64)) as plan_handle,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+1, 4))) as statement_start_offset,
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
+--    convert(varbinary(64), substring(fixed_plan_handle_and_offsets, 1, first_comma_index - 1), 0) as fixed_plan_handle,
+--    convert(int,substring(fixed_plan_handle_and_offsets, first_comma_index + 1, second_comma_index - first_comma_index - 1)) as statement_start_offset,
     * from qstats_aggr
     cross apply (select CHARINDEX(',', fixed_plan_handle_and_offsets , 1) as first_comma_index) as comma_position1
     cross apply (select CHARINDEX(',', fixed_plan_handle_and_offsets , first_comma_index+1)  as second_comma_index) as comma_position2
