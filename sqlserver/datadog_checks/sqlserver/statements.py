@@ -60,7 +60,7 @@ with qstats as (
                 CONVERT(binary(4), statement_start_offset),
                 CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
             CONCAT(
-                CONVERT(nvarchar, plan_handle, 1), ',',
+                CONVERT(nvarchar(64), plan_handle, 1), ',',
                 CONVERT(nvarchar, statement_start_offset), ',',
                 CONVERT(nvarchar, statement_end_offset)) as char_plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
@@ -103,6 +103,7 @@ select
     qt.text as orig_text2,
     qt2.text as fixed_text,
     qt3.text as min_fixed_text,
+    qt4.text as char_fixed_text,
     qt.encrypted as is_encrypted,
     * from qstats_aggr_split
     cross apply sys.dm_exec_sql_text(plan_handle) qt
