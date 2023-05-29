@@ -482,6 +482,8 @@ def test_statement_metadata(
     sample = matching[0]
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
+    print(expected_metadata_payload)
+    print(ample['db']['metadata'])
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
 
     fqt_samples = [

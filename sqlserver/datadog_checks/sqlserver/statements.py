@@ -60,8 +60,8 @@ with qstats as (
                 CONVERT(binary(4), statement_start_offset),
                 CONVERT(binary(4), statement_end_offset)) as plan_handle_and_offsets,
             CONCAT(
-                CONVERT(nvarchar(64), plan_handle, 1), ',',
-                CONVERT(nvarchar, statement_start_offset), ',',
+                CONVERT(nvarchar(64), plan_handle, 1), '_',
+                CONVERT(nvarchar, statement_start_offset), '_',
                 CONVERT(nvarchar, statement_end_offset)) as char_plan_handle_and_offsets,
            (select value from sys.dm_exec_plan_attributes(plan_handle) where attribute = 'dbid') as dbid,
            plan_handle as fixed_plan_handle,
@@ -87,9 +87,9 @@ qstats_aggr_split as (select TOP {limit}
     convert(int, convert(varbinary(4), substring(plan_handle_and_offsets, 64+6, 4))) as statement_end_offset,
     -- substring(char_plan_handle_and_offsets, first_comma_index + 1, second_comma_index - first_comma_index - 1) as statement_start_offset_char,
     convert(binary(64), substring(char_plan_handle_and_offsets, 1, first_comma_index - 1), 1) as char_plan_handle,
-    * from qstats_aggr
-    cross apply (select CHARINDEX(',', char_plan_handle_and_offsets , 1) as first_comma_index) as comma_position1
-    cross apply (select CHARINDEX(',', char_plan_handle_and_offsets , first_comma_index+1)  as second_comma_index) as comma_position2
+    qstats_aggr.* from qstats_aggr
+    cross apply (select CHARINDEX('_', char_plan_handle_and_offsets , 1) as first_comma_index) as comma_position1
+    cross apply (select CHARINDEX('_', char_plan_handle_and_offsets , first_comma_index+1)  as second_comma_index) as comma_position2
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
 select
@@ -399,6 +399,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 for event in self._rows_to_fqt_events(rows):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows)
+                print(payload)
                 self.check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
                 for event in self._collect_plans(rows, cursor, deadline):
                     self.check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
