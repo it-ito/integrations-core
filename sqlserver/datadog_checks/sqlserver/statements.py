@@ -74,9 +74,9 @@ qstats_aggr as (
     group by query_hash, query_plan_hash, S.dbid, D.name
 ),
 qstats_aggr_split as (select TOP {limit}
-    convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1) as plan_handle,
-    convert(int, convert(varbinary, substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
-    convert(int, convert(varbinary, substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
+    convert(varbinary(64), convert(binary(64), substring(plan_handle_and_offsets, 1, 64), 1)) as plan_handle,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+1, 10), 1)) as statement_start_offset,
+    convert(int, convert(varbinary(10), substring(plan_handle_and_offsets, 64+11, 10), 1)) as statement_end_offset,
     * from qstats_aggr
     where DATEADD(ms, last_elapsed_time / 1000, last_execution_time) > dateadd(second, -?, getdate())
 )
