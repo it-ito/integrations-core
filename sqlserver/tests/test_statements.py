@@ -448,9 +448,11 @@ def test_statement_metrics_and_plans(
     ],
 )
 def test_statement_metadata(
-    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload, datadog_conn_docker
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with datadog_conn_docker.cursor() as cursor:
+        cursor.execute('DBCC FREEPROCCACHE')
 
     query = '''
     -- Test comment
@@ -645,6 +647,9 @@ def test_statement_reported_hostname(
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_statement_basic_metrics_query(datadog_conn_docker, dbm_instance):
+    with datadog_conn_docker.cursor() as cursor:
+        cursor.execute('DBCC FREEPROCCACHE')
+
     now = time.time()
     test_query = "select * from sys.databases"
 
