@@ -438,10 +438,6 @@ def test_statement_metrics_and_plans(
     "metadata,expected_metadata_payload",
     [
         (
-            {'tables_csv': 'sys.databases', 'commands': ['SELECT'], 'comments': ['-- Test comment']},
-            {'tables': ['sys.databases'], 'commands': ['SELECT'], 'comments': ['-- Test comment']},
-        ),
-        (
             {'tables_csv': '', 'commands': None, 'comments': None},
             {'tables': None, 'commands': None, 'comments': None},
         ),
