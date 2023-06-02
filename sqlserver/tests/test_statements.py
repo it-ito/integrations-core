@@ -458,9 +458,7 @@ def test_statement_metadata(
     with datadog_conn_docker.cursor() as cursor:
         cursor.execute('DBCC FREEPROCCACHE')
 
-    query = '''
-    -- Test comment
-    select * from sys.databases'''
+    query = 'select * from sys.databases'
     query_signature = '6d1d070f9b6c5647'
 
     def _run_query():
@@ -480,6 +478,7 @@ def test_statement_metadata(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
+    print(dbm_samples)
     matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
     assert len(matching) == 1
     sample = matching[0]
