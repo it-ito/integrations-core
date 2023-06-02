@@ -168,6 +168,8 @@ class SelfHealingConnection:
             logging.exception("failed to close connection")
 
     def execute_with_retries(self, query, params=(), database=None, retries=3, sleep=1, return_result=True):
+        print("execute_with_retries")
+        print(query)
         tracebacks = []
         for attempt in range(retries):
             try:

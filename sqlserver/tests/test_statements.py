@@ -483,6 +483,8 @@ def test_statement_metadata(
     matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
     assert len(matching) == 1
     sample = matching[0]
+    print(expected_metadata_payload)
+    print(sample['db']['metadata'])
     assert sample['db']['metadata']['tables'] == expected_metadata_payload['tables']
     assert sample['db']['metadata']['commands'] == expected_metadata_payload['commands']
     assert sample['db']['metadata']['comments'] == expected_metadata_payload['comments']
