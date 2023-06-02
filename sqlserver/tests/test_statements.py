@@ -459,7 +459,7 @@ def test_statement_metadata(
         cursor.execute('DBCC FREEPROCCACHE')
 
     query = '''
-    -- Test comment dummy
+    -- Test comment
     select * from sys.databases'''
     query_signature = '6d1d070f9b6c5647'
 
