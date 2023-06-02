@@ -451,12 +451,9 @@ def test_statement_metrics_and_plans(
     ],
 )
 def test_statement_metadata(
-    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload,
-    datadog_conn_docker
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent, metadata, expected_metadata_payload
 ):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    with datadog_conn_docker.cursor() as cursor:
-        cursor.execute('DBCC FREEPROCCACHE')
 
     query = 'select * from sys.databases'
     query_signature = '6d1d070f9b6c5647'

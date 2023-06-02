@@ -308,11 +308,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 continue
             obfuscated_statement = statement['query']
             comments = extract_sql_comments(row['text'])
-            print(statement)
-            print("xxx row[text]")
-            print(row['text'])
-            print("xxx comments")
-            print(comments)
             row['dd_comments'] = comments
             # update 'text' field to be obfuscated stmt
             row['text'] = obfuscated_statement
