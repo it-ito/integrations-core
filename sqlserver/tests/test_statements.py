@@ -457,8 +457,8 @@ def test_statement_metadata(
 
     query = '''
     -- Test comment
-    select * from sys.database_files'''
-    query_signature = '6d1d070f9b6c5647'
+    select * from sys.sysusers'''
+    query_signature = '287133f2241aa712'
 
     def _run_query():
         bob_conn.execute_with_retries(query)
@@ -477,6 +477,7 @@ def test_statement_metadata(
     dbm_samples = aggregator.get_event_platform_events("dbm-samples")
     assert dbm_samples, "should have collected at least one sample"
 
+    print(dbm_samples)
     matching = [s for s in dbm_samples if s['db']['query_signature'] == query_signature and s['dbm_type'] == 'plan']
     assert len(matching) == 1
     sample = matching[0]
